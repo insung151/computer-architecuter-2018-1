@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/user/Desktop/2018-1/architecture/assignment/pa1-skeleton/pa1-skeleton/pa1-test.c
+stdio.h
+-
+pa1.h
+C:/Users/user/Desktop/2018-1/architecture/assignment/pa1-skeleton/pa1-skeleton/pa1.h
+
+C:/Users/user/Desktop/2018-1/architecture/assignment/pa1-skeleton/pa1-skeleton/pa1.c
+pa1.h
+C:/Users/user/Desktop/2018-1/architecture/assignment/pa1-skeleton/pa1-skeleton/pa1.h
+
+C:/Users/user/Desktop/2018-1/architecture/assignment/pa1-skeleton/pa1-skeleton/pa1.h
+

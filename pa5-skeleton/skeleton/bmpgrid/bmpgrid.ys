@@ -1,0 +1,104 @@
+#---------------------------------------------------------
+#
+#  Project #4: Drawing grid lines in an image in Y86-64
+#
+#  May 15, 2018
+#
+#  Jin-Soo Kim (jinsoo.kim@snu.ac.kr)
+#  Systems Software & Architecture Laboratory
+#  Dept. of Computer Science and Engineering
+#  Seoul National University
+#
+#---------------------------------------------------------
+
+
+# bmp_grid() starts here
+	.pos	0x400
+	.align 8
+bmp_grid:
+	# imgptr is in %rdi
+	# width  is in %rsi
+	# height is in %rdx
+	# gap	 is in %rcx
+    # ----------------------------------------------------
+
+	irmovq  $255, %rbp
+
+	irmovq  $3, %r13    # r13 = 3
+	mulq    %rcx, %r13  # r13 = 3 * gap
+
+
+	rrmovq  %rsi, %rax  # rax = width
+	irmovq  $3, %rbx    # rbx = 3
+	mulq    %rbx, %rax  # rax = width * 3
+	andq	%rbx, %rax  # rax = rax & 3
+	je L23
+	irmovq	$4, %r8     # r8 = 4
+	subq	%rax, %r8   # r8 = 4 - rax
+	rrmovq	%r8, %rax   # rax = padding
+
+	irmovq  $0, %r12
+
+L23:
+	rrmovq  %rdx, %r14
+	rrmovq  %rsi, %r10  # r10 = width
+	rrmovq  %r13, %rdx
+	iaddq    $-1, %r14   # height = height-1
+	mulq    %rbx, %r10  # r10 = 3* width
+
+	addq	%rax, %r10  # 3 * width + padding
+	rrmovq	%r14, %rax  # rax = height
+	mulq	%r10, %rax  # height * (3 * width + padding)
+	rrmovq  %rdi, %r8   # r8 = simgptr
+	addq    %rax,  %r8  # imgptr += rax (0, 0)
+	rrmovq	%r14, %rbx    # rbx = h = heigth
+
+	rrmovq  %rsi, %rdi
+
+#	rrmovq  %rcx, %r13  # x = gap
+	rrmovq  %rdx, %r9  # r11 = x * 3
+	irmovq  $0, %rdx  # rdx = 0
+
+
+L30:
+	rrmovq  %rbx, %r11  # r11 = h
+	rrmovq	%r8, %rax   # rax = imgptr
+	subq    %r14, %r11   # h - height
+	jne	L27            # h != i
+    subq	%rcx, %rbx # h -= gap
+
+L35:
+	rmmovb	%r12, (%rax)
+	rmmovb	%r12, 1(%rax)
+	rmmovb	%rbp,  2(%rax)
+	iaddq   $3, %rax  # imgptr += 3 * x
+	iaddq   $-1, %rsi
+
+L36:
+	jg	L35
+	rrmovq  %rdi, %rsi
+	subq	%r10, %r8  #
+	iaddq    $-1, %r14  # height - 1
+	jge	L30
+	ret
+
+
+
+
+
+L27:
+	rmmovb	%r12, (%rax)
+	rmmovb	%r12, 1(%rax)
+	rmmovb	%rbp,  2(%rax)
+	addq    %r9, %rax  # imgptr += 3 * gap
+	subq    %rcx, %rsi  # width - gap
+
+L25:
+	jg	L27
+	rrmovq  %rdi, %rsi
+	subq	%r10, %r8  #
+
+	iaddq    $-1, %r14  # height - 1
+	jge	L30
+
+	ret

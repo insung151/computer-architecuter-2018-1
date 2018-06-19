@@ -1,0 +1,108 @@
+#---------------------------------------------------------
+#
+#  Project #4: Drawing grid lines in an image in Y86-64
+#
+#  May 15, 2018
+#
+#  Jin-Soo Kim (jinsoo.kim@snu.ac.kr)
+#  Systems Software & Architecture Laboratory
+#  Dept. of Computer Science and Engineering
+#  Seoul National University
+#
+#---------------------------------------------------------
+
+
+# bmp_grid() starts here
+	.pos	0x400
+	.align 8
+bmp_grid:
+	# imgptr is in %rdi
+	# width  is in %rsi
+	# height is in %rdx
+	# gap	 is in %rcx
+    # ----------------------------------------------------
+
+	pushq	%rbx
+	pushq	%r12
+	pushq   %r13
+	pushq   %r14
+
+
+	irmovq  $3, %r13    # r13 = 3
+	mulq    %rcx, %r13  # r13 = 3 * gap
+
+	rrmovq  %rsi, %rax  # rax = width
+	irmovq  $3, %rbx    # rbx = 3
+	mulq    %rbx, %rax  # rax = width * 3
+	andq	%rbx, %rax  # rax = rax & 3
+	je	L23
+	irmovq	$4, %r8     # r8 = 4
+	subq	%rax, %r8   # r8 = 4 - rax
+	rrmovq	%r8, %rax   # rax = padding
+
+	irmovq  $0, %r12
+
+L23:
+	rrmovq  %rdx, %r14
+	iaddq    $-1, %r14   # height = height-1
+	rrmovq  %rsi, %r10  # r10 = width
+	mulq    %rbx, %r10  # r10 = 3* width
+
+	addq	%rax, %r10  # 3 * width + padding
+	rrmovq	%r14, %rax  # rax = height
+	mulq	%r10, %rax  # height * (3 * width + padding)
+	rrmovq  %rdi, %r8   # r8 = simgptr
+	addq    %rax,  %r8  # imgptr += rax (0, 0)
+	irmovq	$0, %r9     # r9 = i
+	irmovq	$0, %rbx    # rbx = h
+	jmp	L24
+L30:
+	rrmovq	%r8, %rax   # rax = imgptr
+	irmovq	$0, %rdx    # j = 0
+	pushq   %r10
+	rrmovq  %rbx, %r11  # r11 = h
+	subq    %r9, %r11   # h - i
+	je	L31             # h == i
+	rrmovq  %rcx, %r10  # x = gap
+	irmovq  $3,   %r11  # r11 = 3
+	rrmovq  %r10, %r13  # r13 = x
+	mulq    %r11, %r13  # r13 = x * 3
+	jmp	L25
+L27:
+	rmmovb	%r12, (%rax)
+	rmmovb	%r12, 1(%rax)
+	rmmovb	%r14,  2(%rax)
+
+	addq    %r13, %rax  # imgptr += 3 * x
+	addq	%r10, %rdx  # j += x
+L25:
+	rrmovq  %rsi, %r11 # r11 = width
+	subq    %rdx, %r11 # width - j
+	jg	L27
+	popq    %r10
+	subq	%r10, %r8  #
+	jmp	L28
+
+L31:
+    irmovq  $1, %r10   # x = 1
+    irmovq  $3, %r13   # r13 = x*3
+    addq	%rcx, %rbx # h += gap
+    jmp L25
+
+L28:
+	popq    %r14
+	iaddq	$1, %r9    # i += 1
+L24:
+	rrmovq  %r14, %r11  # r11 = height
+	subq	%r9, %r11   # height - i
+	pushq   %r14
+	irmovq  $255, %r14
+	jge	L30
+	popq    %r14
+
+	popq	%r14
+	popq    %r13
+	popq    %r12
+	popq    %rbx
+
+	ret
